@@ -23,18 +23,21 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
     <!-- Needed by Redis to run -->
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
     <PackageReference Include="Docker.DotNet" Version="$(DockerVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka.TestKit" Version="$(AkkaVersion)" />
-    <PackageReference Include="Akka.Persistence.TCK" Version="$(AkkaVersion)" />
-    <PackageReference Include="Akka.TestKit.Xunit2" Version="$(AkkaVersion)" />
-    <PackageReference Include="Akka.Streams.TestKit" Version="$(AkkaVersion)" />
+    <PackageReference Include="Akka.TestKit" Version="1.4.11" />
+    <PackageReference Include="Akka.Persistence.TCK" Version="1.4.11" />
+    <PackageReference Include="Akka.TestKit.Xunit2" Version="1.4.11" />
+    <PackageReference Include="Akka.Streams.TestKit" Version="1.4.11" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
