@@ -15,13 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka" Version="1.4.11" />
+    <PackageReference Include="Akka" Version="$(AkkaVersion)" />
     <PackageReference Include="Akka.Persistence" Version="$(AkkaVersion)" />
     <PackageReference Include="Akka.Persistence.Query" Version="$(AkkaVersion)" />
-    <PackageReference Include="Akka.Streams" Version="1.4.11" />
+    <PackageReference Include="Akka.Streams" Version="$(AkkaVersion)" />
     <PackageReference Include="StackExchange.Redis" Version="$(RedisVersion)" />
-    <PackageReference Include="Akka.Persistence" Version="1.4.11" />
-    <PackageReference Include="Akka.Persistence.Query" Version="1.4.11" />
-    <PackageReference Include="StackExchange.Redis" Version="$(RedisVersion)" />
+    <PackageReference Include="Akka.Persistence" Version="$(AkkaVersion)" />
+    <PackageReference Include="Akka.Persistence.Query" Version="$(AkkaVersion)" />
   </ItemGroup>
 </Project>
