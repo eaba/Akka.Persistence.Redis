@@ -16,13 +16,14 @@ using Akka.Streams;
 namespace Akka.Persistence.Redis.Query
 {
     public class RedisReadJournal :
-        IReadJournal,
         IPersistenceIdsQuery,
         ICurrentPersistenceIdsQuery,
         IEventsByPersistenceIdQuery,
         ICurrentEventsByPersistenceIdQuery,
+        IEventsByTagQuery,
         ICurrentEventsByTagQuery,
-        IEventsByTagQuery
+        IAllEventsQuery,
+        ICurrentAllEventsQuery
     {
         private readonly ExtendedActorSystem _system;
         private readonly Config _config;
@@ -112,6 +113,16 @@ namespace Akka.Persistence.Redis.Query
                 default:
                     throw new ArgumentException($"RedisReadJournal does not support {offset.GetType().Name} offsets");
             }
+        }
+
+        public Source<EventEnvelope, NotUsed> AllEvents(Offset offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Source<EventEnvelope, NotUsed> CurrentAllEvents(Offset offset)
+        {
+            throw new NotImplementedException();
         }
     }
 }

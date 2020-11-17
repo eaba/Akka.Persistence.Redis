@@ -71,6 +71,7 @@ namespace Akka.Persistence.Redis.Journal
 
         protected override async Task<IImmutableList<Exception>> WriteMessagesAsync(IEnumerable<AtomicWrite> messages)
         {
+           
             var writeTasks = messages.Select(WriteBatchAsync).ToList();
 
             foreach (var writeTask in writeTasks)
@@ -102,21 +103,22 @@ namespace Akka.Persistence.Redis.Journal
                 // save tags
                 foreach (var tag in tags)
                 {
-                    transaction.ListRightPushAsync(_journalHelper.GetTagKey(tag), $"{payload.SequenceNr}:{payload.PersistenceId}");
-                    transaction.PublishAsync(_journalHelper.GetTagsChannel(), tag);
+                    await transaction.ListRightPushAsync(_journalHelper.GetTagKey(tag), $"{payload.SequenceNr}:{payload.PersistenceId}");
+                    await transaction.PublishAsync(_journalHelper.GetTagsChannel(), tag);
                 }
             }
 
             // set highest sequence number key
-            transaction.StringSetAsync(_journalHelper.GetHighestSequenceNrKey(aw.PersistenceId), aw.HighestSequenceNr);
+            await transaction.StringSetAsync(_journalHelper.GetHighestSequenceNrKey(aw.PersistenceId), aw.HighestSequenceNr);
 
             // add persistenceId
-            transaction.SetAddAsync(_journalHelper.GetIdentifiersKey(), aw.PersistenceId).ContinueWith(task =>
+            await transaction.SetAddAsync(_journalHelper.GetIdentifiersKey(), aw.PersistenceId).ContinueWith( async task =>
             {
                 if (task.Result)
                 {
                     // notify about a new persistenceId
-                    Database.Publish(_journalHelper.GetIdentifiersChannel(), aw.PersistenceId);
+                    var y = await Database.PublishAsync(_journalHelper.GetIdentifiersChannel(), aw.PersistenceId);
+                    var yy = y;
                 }
             });
 
