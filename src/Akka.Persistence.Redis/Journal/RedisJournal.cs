@@ -103,22 +103,21 @@ namespace Akka.Persistence.Redis.Journal
                 // save tags
                 foreach (var tag in tags)
                 {
-                    await transaction.ListRightPushAsync(_journalHelper.GetTagKey(tag), $"{payload.SequenceNr}:{payload.PersistenceId}");
-                    await transaction.PublishAsync(_journalHelper.GetTagsChannel(), tag);
+                   transaction.ListRightPushAsync(_journalHelper.GetTagKey(tag), $"{payload.SequenceNr}:{payload.PersistenceId}");
+                   transaction.PublishAsync(_journalHelper.GetTagsChannel(), tag);
                 }
             }
 
             // set highest sequence number key
-            await transaction.StringSetAsync(_journalHelper.GetHighestSequenceNrKey(aw.PersistenceId), aw.HighestSequenceNr);
+            transaction.StringSetAsync(_journalHelper.GetHighestSequenceNrKey(aw.PersistenceId), aw.HighestSequenceNr);
 
             // add persistenceId
-            await transaction.SetAddAsync(_journalHelper.GetIdentifiersKey(), aw.PersistenceId).ContinueWith( async task =>
+            transaction.SetAddAsync(_journalHelper.GetIdentifiersKey(), aw.PersistenceId).ContinueWith(task =>
             {
                 if (task.Result)
                 {
                     // notify about a new persistenceId
-                    var y = await Database.PublishAsync(_journalHelper.GetIdentifiersChannel(), aw.PersistenceId);
-                    var yy = y;
+                    Database.Publish(_journalHelper.GetIdentifiersChannel(), aw.PersistenceId);
                 }
             });
 
@@ -128,7 +127,6 @@ namespace Akka.Persistence.Redis.Journal
             }
         }
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-
         private (byte[], IImmutableSet<string>) Extract(IPersistentRepresentation pr)
         {
             if (pr.Payload is Tagged tag)

@@ -39,5 +39,7 @@ namespace Akka.Persistence.Redis
         public string GetTagKey(string tag) => $"{KeyPrefix}journal:tag:{tag}";
         public string GetTagsChannel() => $"{KeyPrefix}journal:channel:tags";
         public string GetIdentifiersChannel() => $"{KeyPrefix}journal:channel:ids";
+
+        public string GetJournalChannel() => $"{KeyPrefix}journal:channel:persisted:";
     }
 }
