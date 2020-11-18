@@ -11,6 +11,7 @@ using StackExchange.Redis;
 
 namespace Akka.Persistence.Redis.Query.Stages
 {
+    //https://dzone.com/articles/tips-amp-tricks-to-using-keys-innbspredis
     internal class AllEventsSource : GraphStage<SourceShape<EventEnvelope>>
     {
         private readonly ConnectionMultiplexer _redis;
@@ -74,15 +75,7 @@ namespace Akka.Persistence.Redis.Query.Stages
             private long _toSequenceNr;
             private readonly bool _live;
 
-            public AllEventsLogic(
-                ConnectionMultiplexer redis,
-                int database,
-                Config config,
-                ActorSystem system,
-                long fromSequenceNr,
-                long toSequenceNr,
-                bool live,
-                Outlet<EventEnvelope> outlet, Shape shape) : base(shape)
+            public AllEventsLogic(ConnectionMultiplexer redis, int database, Config config, ActorSystem system, long fromSequenceNr, long toSequenceNr, bool live, Outlet<EventEnvelope> outlet, Shape shape) : base(shape)
             {
                 _outlet = outlet;
                 _redis = redis;
@@ -152,9 +145,7 @@ namespace Akka.Persistence.Redis.Query.Stages
                     {
                         var (evts, maxSequenceNr) = events.Aggregate((new List<EventEnvelope>(), _currentSequenceNr), (tuple, pr) =>
                         {
-                            if (!pr.IsDeleted &&
-                                pr.SequenceNr >= _currentSequenceNr &&
-                                pr.SequenceNr <= _toSequenceNr)
+                            if (!pr.IsDeleted && pr.SequenceNr >= _currentSequenceNr && pr.SequenceNr <= _toSequenceNr)
                             {
                                 tuple.Item1.Add(new EventEnvelope(new Sequence(pr.SequenceNr), pr.PersistenceId, pr.SequenceNr, pr.Payload));
                                 tuple.Item2 = pr.SequenceNr + 1;

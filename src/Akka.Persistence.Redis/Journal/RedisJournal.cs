@@ -100,6 +100,13 @@ namespace Akka.Persistence.Redis.Journal
                 // notify about a new event being appended for this persistence id
                 transaction.PublishAsync(_journalHelper.GetJournalChannel(payload.PersistenceId), payload.SequenceNr);
 
+                //save event
+                var evt = $"{payload.SequenceNr}:{payload.PersistenceId}";
+                transaction.ListRightPushAsync(_journalHelper.GetEventsKey(), evt);
+
+                // notify about this event
+                transaction.PublishAsync(_journalHelper.GetEventsChannel(), evt);
+
                 // save tags
                 foreach (var tag in tags)
                 {

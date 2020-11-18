@@ -298,10 +298,7 @@ namespace Akka.Persistence.Redis.Query.Stages
                             _state = State.Querying;
 
                             // request next batch of events for this tag (potentially limiting to the max offset in the case of non live stream)
-                            var refs = _redis.GetDatabase(_database).ListRange(
-                                _journalHelper.GetTagKey(_tag),
-                                _currentOffset,
-                                Math.Min(_maxOffset, _currentOffset + _max - 1));
+                            var refs = _redis.GetDatabase(_database).ListRange(_journalHelper.GetTagKey(_tag), _currentOffset, Math.Min(_maxOffset, _currentOffset + _max - 1));
 
                             var trans = _redis.GetDatabase(_database).CreateTransaction();
 
