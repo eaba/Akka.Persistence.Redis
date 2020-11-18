@@ -8,10 +8,12 @@ using Akka.Configuration;
 using Akka.Persistence.Query;
 using Akka.Persistence.Redis.Query;
 using Akka.Persistence.TCK.Query;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Akka.Persistence.Redis.Tests.Query
 {
+    [Collection("RedisSpec")]
     public class RedisAllEventsSpec : AllEventsSpec
     {
         public const int Database = 1;
@@ -39,7 +41,7 @@ namespace Akka.Persistence.Redis.Tests.Query
             .WithFallback(RedisPersistence.DefaultConfig());
         }
 
-        public RedisAllEventsSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisEventsByTagSpec), output)
+        public RedisAllEventsSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisAllEventsSpec), output)
         {
             ReadJournal = Sys.ReadJournalFor<RedisReadJournal>(RedisReadJournal.Identifier);
         }
