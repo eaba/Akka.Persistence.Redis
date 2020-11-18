@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EventsByTagSource.cs" company="Akka.NET Project">
+// <copyright file="AllEventsSource.cs" company="Akka.NET Project">
 //     Copyright (C) 2017 Akka.NET Contrib <https://github.com/AkkaNetContrib/Akka.Persistence.Redis>
 // </copyright>
 //-----------------------------------------------------------------------
