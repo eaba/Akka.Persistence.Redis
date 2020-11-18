@@ -117,44 +117,30 @@ namespace Akka.Persistence.Redis.Query
 
         public Source<EventEnvelope, NotUsed> AllEvents(Offset offset = null)
         {
-            Sequence seq;
+            offset = offset ?? new Sequence(0L);
             switch (offset)
             {
-                case null:
+                case Sequence seq:
+                    return Source.FromGraph(new AllEventsSource(_redis, _database, _config, seq.Value, _system, true));
                 case NoOffset _:
-                    seq = new Sequence(0L);
-                    break;
-                case Sequence s:
-                    seq = s;
-                    break;
+                    return AllEvents(new Sequence(0L));
                 default:
-                    throw new ArgumentException($"MongoDbReadJournal does not support {offset.GetType().Name} offsets");
+                    throw new ArgumentException($"RedisReadJournal does not support {offset.GetType().Name} offsets");
             }
-
-            return Source.ActorPublisher<EventEnvelope>(AllEventsPublisher.Props(seq.Value, _refreshInterval, _maxBufferSize, _writeJournalPluginId))
-                .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("AllEvents");
         }
 
         public Source<EventEnvelope, NotUsed> CurrentAllEvents(Offset offset)
         {
-            Sequence seq;
+            offset = offset ?? new Sequence(0L);
             switch (offset)
             {
-                case null:
+                case Sequence seq:
+                    return Source.FromGraph(new AllEventsSource(_redis, _database, _config, seq.Value, _system, false));
                 case NoOffset _:
-                    seq = new Sequence(0L);
-                    break;
-                case Sequence s:
-                    seq = s;
-                    break;
+                    return CurrentAllEvents(new Sequence(0L));
                 default:
                     throw new ArgumentException($"RedisReadJournal does not support {offset.GetType().Name} offsets");
             }
-
-            return Source.ActorPublisher<EventEnvelope>(AllEventsPublisher.Props(seq.Value, null, _maxBufferSize, _writeJournalPluginId))
-                .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("CurrentAllEvents");
         }
     }
 }
