@@ -12,6 +12,8 @@ using StackExchange.Redis;
 using System;
 using Akka.Persistence.Redis.Query.Stages;
 using Akka.Streams;
+using Reactive.Streams;
+using System.Threading;
 
 namespace Akka.Persistence.Redis.Query
 {
@@ -31,6 +33,12 @@ namespace Akka.Persistence.Redis.Query
         private ConnectionMultiplexer _redis;
         private int _database;
 
+        private readonly TimeSpan _refreshInterval;
+        private readonly string _writeJournalPluginId;
+
+        private readonly object _lock = new object();
+        private IPublisher<string> _persistenceIdsPublisher;
+
         /// <summary>
         /// The default identifier for <see cref="RedisReadJournal" /> to be used with <see cref="PersistenceQueryExtensions.ReadJournalFor{TJournal}" />.
         /// </summary>
@@ -44,13 +52,39 @@ namespace Akka.Persistence.Redis.Query
 
             _database = system.Settings.Config.GetInt("akka.persistence.journal.redis.database");
             _redis = ConnectionMultiplexer.Connect(address);
+
+            _refreshInterval = config.GetTimeSpan("refresh-interval");
+            _writeJournalPluginId = config.GetString("write-plugin");
+
+            _lock = new ReaderWriterLockSlim();
+            _persistenceIdsPublisher = null;
         }
 
         /// <summary>
-        /// Returns the live stream of persisted identifiers. Identifiers may appear several times in the stream.
+        /// <para>
+        /// <see cref="PersistenceIds"/> is used for retrieving all `persistenceIds` of all
+        /// persistent actors.
+        /// </para>
+        /// The returned event stream is unordered and you can expect different order for multiple
+        /// executions of the query.
+        /// <para>
+        /// The stream is not completed when it reaches the end of the currently used `persistenceIds`,
+        /// but it continues to push new `persistenceIds` when new persistent actors are created.
+        /// Corresponding query that is completed when it reaches the end of the currently
+        /// currently used `persistenceIds` is provided by <see cref="CurrentPersistenceIds"/>.
+        /// </para>
+        /// The SQL write journal is notifying the query side as soon as new `persistenceIds` are
+        /// created and there is no periodic polling or batching involved in this query.
+        /// <para>
+        /// The stream is completed with failure if there is a failure in executing the query in the
+        /// backend journal.
+        /// </para>
         /// </summary>
+        /// 
+
         public Source<string, NotUsed> PersistenceIds() =>
             Source.FromGraph(new PersistenceIdsSource(_redis, _database, _system));
+        
 
         /// <summary>
         /// Returns the stream of current persisted identifiers. This stream is not live, once the identifiers were all returned, it is closed.

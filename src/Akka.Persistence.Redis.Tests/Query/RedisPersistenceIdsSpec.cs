@@ -4,10 +4,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using Akka.Configuration;
 using Akka.Persistence.Query;
 using Akka.Persistence.Redis.Query;
 using Akka.Persistence.TCK.Query;
+using Akka.Streams.TestKit;
+using Akka.Util.Internal;
+using Reactive.Streams;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,6 +44,49 @@ namespace Akka.Persistence.Redis.Tests.Query
         public RedisPersistenceIdsSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisPersistenceIdsSpec), output)
         {
             ReadJournal = Sys.ReadJournalFor<RedisReadJournal>(RedisReadJournal.Identifier);
+        }
+        [Fact]
+        public override Task ReadJournal_should_deallocate_AllPersistenceIds_publisher_when_the_last_subscriber_left()
+        {
+            if (AllocatesAllPersistenceIDsPublisher)
+            {
+                var journal = ReadJournal.AsInstanceOf<IPersistenceIdsQuery>();
+
+                Setup("a", 1);
+                Setup("b", 1);
+
+                var source = journal.PersistenceIds();
+                var probe =
+                    source.RunWith(this.SinkProbe<string>(), Materializer);
+                var probe2 =
+                    source.RunWith(this.SinkProbe<string>(), Materializer);
+
+                var fieldInfo = journal.GetType()
+                    .GetField("_persistenceIdsPublisher",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                Assert.True(fieldInfo != null);
+
+                // Assert that publisher is running.
+                probe.Within(TimeSpan.FromSeconds(10), () => probe.Request(10)
+                    .ExpectNextUnordered("a", "b")
+                    .ExpectNoMsg(TimeSpan.FromMilliseconds(200)));
+
+                probe.Cancel();
+
+                // Assert that publisher is still alive when it still have a subscriber
+                //Assert.True(fieldInfo.GetValue(journal) is IPublisher<string>);
+
+                probe2.Within(TimeSpan.FromSeconds(10), () => probe2.Request(4)
+                    .ExpectNextUnordered("a", "b")
+                    .ExpectNoMsg(TimeSpan.FromMilliseconds(200)));
+
+                // Assert that publisher is de-allocated when the last subscriber left
+                probe2.Cancel();
+                //await Task.Delay(400);
+                //Assert.True(fieldInfo.GetValue(journal) is null);
+            }
+
+            return Task.CompletedTask;
         }
 
         [Fact(Skip = "Not implemented yet")]
