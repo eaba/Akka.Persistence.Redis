@@ -54,11 +54,7 @@ namespace CustomSerialization.MsgPack.Serialization
 
         static MsgPackSerializer()
         {
-            /*CompositeResolver.RegisterAndSetAsDefault(
-                ActorPathResolver.Instance,
-                OldSpecResolver.Instance, // Redis compatible MsgPack spec
-                ContractlessStandardResolver.Instance);*/
-            CompositeResolver.Create(new[] { ActorPathResolver.Instance }/*, new[] { ContractlessStandardResolver.Instance }*/);
+            CompositeResolver.Create(new[] { ActorPathResolver.Instance });
         }
 
         public MsgPackSerializer(ExtendedActorSystem system) : base(system)

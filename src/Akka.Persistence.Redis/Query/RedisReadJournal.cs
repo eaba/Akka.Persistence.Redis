@@ -11,9 +11,6 @@ using Akka.Streams.Dsl;
 using StackExchange.Redis;
 using System;
 using Akka.Persistence.Redis.Query.Stages;
-using Akka.Streams;
-using Reactive.Streams;
-using System.Threading;
 
 namespace Akka.Persistence.Redis.Query
 {
@@ -33,12 +30,6 @@ namespace Akka.Persistence.Redis.Query
         private ConnectionMultiplexer _redis;
         private int _database;
 
-        private readonly TimeSpan _refreshInterval;
-        private readonly string _writeJournalPluginId;
-
-        private readonly object _lock = new object();
-        private IPublisher<string> _persistenceIdsPublisher;
-
         /// <summary>
         /// The default identifier for <see cref="RedisReadJournal" /> to be used with <see cref="PersistenceQueryExtensions.ReadJournalFor{TJournal}" />.
         /// </summary>
@@ -52,12 +43,6 @@ namespace Akka.Persistence.Redis.Query
 
             _database = system.Settings.Config.GetInt("akka.persistence.journal.redis.database");
             _redis = ConnectionMultiplexer.Connect(address);
-
-            _refreshInterval = config.GetTimeSpan("refresh-interval");
-            _writeJournalPluginId = config.GetString("write-plugin");
-
-            _lock = new ReaderWriterLockSlim();
-            _persistenceIdsPublisher = null;
         }
 
         /// <summary>
@@ -179,7 +164,7 @@ namespace Akka.Persistence.Redis.Query
         /// The stream is completed with failure if there is a failure in executing the query in the
         /// backend journal.
         /// </summary>
-        public Source<EventEnvelope, NotUsed> AllEvents(Offset offset = null)
+        public Source<EventEnvelope, NotUsed> AllEvents(Offset offset)
         {
             offset = offset ?? new Sequence(0L);
             switch (offset)
