@@ -40,11 +40,6 @@ namespace Akka.Persistence.Redis.Tests.Query
             ReadJournal = Sys.ReadJournalFor<RedisReadJournal>(RedisReadJournal.Identifier);
         }
 
-        [Fact(Skip = "Not implemented yet")]
-        public override void ReadJournal_query_CurrentPersistenceIds_should_not_see_new_events_after_complete()
-        {
-        }
-
         protected override void Dispose(bool disposing)
         {
             DbUtils.Clean(Database);
