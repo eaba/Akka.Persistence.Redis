@@ -200,7 +200,7 @@ namespace Akka.Persistence.Redis.Query
         public Source<EventEnvelope, NotUsed> CurrentAllEvents(Offset offset)
         {
             offset = offset ?? new Sequence(0L);
-            switch (offset)
+            switch (offset) 
             {
                 case Sequence seq:
                     return Source.FromGraph(new AllEventsSource(_redis, _database, _config, seq.Value, _system, false));
