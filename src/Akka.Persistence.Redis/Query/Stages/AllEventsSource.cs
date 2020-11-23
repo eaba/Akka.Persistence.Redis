@@ -212,10 +212,6 @@ namespace Akka.Persistence.Redis.Query.Stages
                                     break;
                             }
                         }
-                        else if (data.channel.Equals(_journalHelper.GetEventsChannel()))
-                        {
-                            // ignore other tags
-                        }
                         else
                         {
                             Log.Debug($"Message from unexpected channel: {data.channel}");
