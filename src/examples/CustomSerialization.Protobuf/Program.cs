@@ -15,7 +15,7 @@ using Akka.Pattern;
 
 namespace CustomSerialization.Protobuf
 {
-    //docker run --name test-redis-container -p 6379:6379 -d redis
+    
     class Program
     {
         // if you want to benchmark your persistent storage provides, paste the configuration in string below

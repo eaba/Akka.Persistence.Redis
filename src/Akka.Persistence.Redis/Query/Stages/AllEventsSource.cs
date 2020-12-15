@@ -17,7 +17,6 @@ using StackExchange.Redis;
 
 namespace Akka.Persistence.Redis.Query.Stages
 {
-    //https://dzone.com/articles/tips-amp-tricks-to-using-keys-innbspredis
     internal class AllEventsSource : GraphStage<SourceShape<EventEnvelope>>
     {
         private readonly ConnectionMultiplexer _redis;
@@ -169,7 +168,8 @@ namespace Akka.Persistence.Redis.Query.Stages
                             }
 
                             return null;
-                        }).ToList();
+                        })//in case of null
+                        .Where(x=> x != null).ToList();
 
                         _currentOffset += nb;
                         if (evts.Count > 0)

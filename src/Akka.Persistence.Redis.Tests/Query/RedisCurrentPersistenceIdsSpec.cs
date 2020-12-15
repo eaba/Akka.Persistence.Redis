@@ -61,7 +61,6 @@ namespace Akka.Persistence.Redis.Tests.Query
             //probe.Within(TimeSpan.FromSeconds(10), () => probe.Request(1).ExpectError());
         }
 
-        //now implemented
         /*[Fact(Skip = "Not implemented yet")]
         public override void ReadJournal_query_CurrentPersistenceIds_should_not_see_new_events_after_complete()
         {
