@@ -159,17 +159,13 @@ namespace Akka.Persistence.Redis.Query.Stages
                     }
                     else
                     {
-                        var evts = events.ZipWithIndex().Select(c =>
+                        var evts = events.ZipWithIndex()
+                        .Where(kvp => kvp.Key.Item2 != null && !kvp.Key.Item2.IsDeleted)
+                        .Select(c =>
                         {
                             var repr = c.Key.Item2;
-                            if (repr != null && !repr.IsDeleted)
-                            {
-                                return new EventEnvelope(new Sequence(_currentOffset + c.Value), repr.PersistenceId, repr.SequenceNr, repr.Payload);
-                            }
-
-                            return null;
-                        })//in case of null
-                        .Where(x=> x != null).ToList();
+                            return new EventEnvelope(new Sequence(_currentOffset + c.Value), repr.PersistenceId, repr.SequenceNr, repr.Payload);
+                        }).ToList();
 
                         _currentOffset += nb;
                         if (evts.Count > 0)
@@ -209,6 +205,10 @@ namespace Akka.Persistence.Redis.Query.Stages
                                 case State.WaitingForNotification:
                                     _state = State.Idle;
                                     Query();
+                                    break;
+                                default:
+                                    Log.Error($"Unexpected source state: {_state}");
+                                    FailStage(new IllegalStateException($"Unexpected source state: {_state}"));
                                     break;
                             }
                         }
