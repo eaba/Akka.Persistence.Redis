@@ -39,7 +39,7 @@ namespace Akka.Persistence.Redis.Tests.Query
         {
             ReadJournal = Sys.ReadJournalFor<RedisReadJournal>(RedisReadJournal.Identifier);
         }
-         
+        
         protected override void Dispose(bool disposing)
         {
             DbUtils.Clean(Database);
